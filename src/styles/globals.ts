@@ -20,8 +20,13 @@ const globalStyles = createGlobalStyle`
     padding: 0 ${rem(50)};
     font-size: ${rem(baseSize)};
     line-height: 150%;
+    width: 100%;
+    box-sizing: border-box;
     font-family: 'Open Sans', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
     min-height: 100%;
+    @media screen and (max-width: ${rem(480)}) {
+      padding: 0 ${rem(20)};
+    }
   }
 
   h1 {

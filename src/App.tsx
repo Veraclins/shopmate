@@ -9,7 +9,7 @@ interface MainProps {
   history: History;
 }
 
-const App: React.SFC<MainProps> = ({ history }) => (
+const App: React.FunctionComponent<MainProps> = ({ history }) => (
   <ConnectedRouter history={history}>
     <MainContainer>{routes}</MainContainer>
   </ConnectedRouter>
