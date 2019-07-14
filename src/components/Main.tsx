@@ -40,6 +40,7 @@ const Container = styled.div`
   width: 100%;
   box-sizing: border-box;
   height: 100%;
+  min-height: 60vh;
 `;
 
 const StyledMain = styled.div`

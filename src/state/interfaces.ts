@@ -51,3 +51,20 @@ export interface CartInput {
   product_id: number;
   attributes: string;
 }
+
+export interface Customer {
+  address_1: string;
+  address_2: string;
+  city: string;
+  country: string;
+  credit_card: string;
+  customer_id: number;
+  day_phone: string;
+  email: string;
+  eve_phone: string;
+  mob_phone: string;
+  name: string;
+  postal_code: string;
+  region: string;
+  shipping_region_id: number;
+}

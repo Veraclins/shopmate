@@ -1,36 +1,91 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaShoppingBag } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { FaSignOutAlt, FaUser, FaAddressCard } from 'react-icons/fa';
 
-import { dark, brand, white } from 'styles/colors';
+import { dark, brand, white, light, grey } from 'styles/colors';
 import { rem } from 'styles';
-import GBFlag from 'assets/gbf.png';
-import Badge from 'components/Badge';
-import Modal from './Modal';
-import Login from './Login';
-import SignUp from './Signup';
-import { CartItem } from 'state/interfaces';
+import USFlag from 'assets/usflag.jpeg';
+import Modal from 'components/Modal';
+import Login from 'components/Login';
+import SignUp from 'components/Signup';
+import { CartItem, Customer } from 'state/interfaces';
+import CartIcon from 'components/CartIcon';
+import Profile from 'components/Profile';
+import Address from 'components/Address';
+import { logout } from 'state/user';
+import { useDispatch } from 'react-redux';
 
 interface TopBarProps {
   items: CartItem[];
   theme?: any;
+  customer: Customer;
+  authenticated?: boolean;
+  bag?: number;
 }
 
-const Top: React.FunctionComponent<TopBarProps> = ({ theme, items }) => {
+const Top: React.FunctionComponent<TopBarProps> = ({
+  theme,
+  items,
+  bag,
+  customer,
+  authenticated,
+}) => {
   const badge = {
     badgeColor: white,
     badgeBackground: brand,
   };
   const [modalId, showModal] = useState('');
+  const [showUserMenu, toggleUserMenu] = useState(false);
+
+  const dispatch = useDispatch();
+  const LogOut = () => {
+    dispatch(logout());
+  };
+
   return (
     <Container theme={theme}>
       <Auth>
         Hi! &nbsp;
-        <AuthLink onClick={() => showModal('login')}>Sign In</AuthLink>
-        &nbsp;or&nbsp;
-        <AuthLink onClick={() => showModal('sign-up')}>Register</AuthLink>
+        {authenticated && customer ? (
+          <User>
+            <AuthLink onClick={() => toggleUserMenu(!showUserMenu)}>
+              {customer.name}
+            </AuthLink>
+            {showUserMenu && (
+              <UserMenu>
+                <UserMenuItem
+                  onClick={() => {
+                    showModal('profile');
+                    toggleUserMenu(false);
+                  }}
+                >
+                  <FaUser />
+                  Update Profile
+                </UserMenuItem>
+                <UserMenuItem
+                  onClick={() => {
+                    showModal('address');
+                    toggleUserMenu(false);
+                  }}
+                >
+                  <FaAddressCard />
+                  Update Address
+                </UserMenuItem>
+                <UserMenuItem onClick={() => LogOut()}>
+                  <FaSignOutAlt />
+                  Logout
+                </UserMenuItem>
+              </UserMenu>
+            )}
+          </User>
+        ) : (
+          <>
+            <AuthLink onClick={() => showModal('login')}>Sign In</AuthLink>
+            &nbsp; or &nbsp;
+            <AuthLink onClick={() => showModal('sign-up')}>Register</AuthLink>
+          </>
+        )}
       </Auth>
       <Main>
         <NavLink to="deals">Daily Deals</NavLink>
@@ -39,25 +94,39 @@ const Top: React.FunctionComponent<TopBarProps> = ({ theme, items }) => {
       </Main>
       <RightNav>
         <Currency>
-          <Flag src={GBFlag} alt="" /> £ GBP
+          <Flag src={USFlag} alt="" /> $ USD
         </Currency>
         <Details>
-          <Badge theme={badge} value={items.length}>
-            <Cart>
-              <FaShoppingBag />
-            </Cart>
-          </Badge>
-          Your bag: £3.98
+          <Cart>
+            <CartIcon theme={badge} customer={customer} items={items} />
+          </Cart>
+          Your bag: ${bag}
         </Details>
       </RightNav>
       {modalId && (
         <Modal small close={() => showModal('')}>
           {modalId === 'login' && (
-            <Login signUpAction={() => showModal('sign-up')} />
+            <Login
+              signUpAction={() => showModal('sign-up')}
+              close={() => showModal('')}
+            />
           )}
           {modalId === 'sign-up' && (
-            <SignUp loginAction={() => showModal('login')} />
+            <SignUp
+              loginAction={() => showModal('login')}
+              close={() => showModal('')}
+            />
           )}
+        </Modal>
+      )}
+      {modalId === 'profile' && (
+        <Modal close={() => showModal('')}>
+          <Profile close={() => showModal('')} customer={customer} />
+        </Modal>
+      )}
+      {modalId === 'address' && (
+        <Modal close={() => showModal('')}>
+          <Address close={() => showModal('')} customer={customer} />
         </Modal>
       )}
     </Container>
@@ -69,9 +138,9 @@ const Container = styled.div`
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  margin: 0 -${rem(30)};
+  margin: 0 -${rem(50)};
   width: 100%;
-  padding: ${rem(15)} ${rem(30)};
+  padding: ${rem(15)} ${rem(50)};
   font-family: Montserrat, 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
   font-size: ${rem(20)};
   background: ${({ theme }) => theme.topNavBackground};
@@ -126,8 +195,38 @@ const Flag = styled.img`
   margin-right: ${rem(10)};
 `;
 
-const mapStateToProps = (state): any => ({
-  pathname: state.router.location.pathname,
-});
+const User = styled.div`
+  position: relative;
+`;
 
-export default connect(mapStateToProps)(Top);
+const UserMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  transition: 0.5s all ease;
+  z-index: 3;
+  width: auto;
+  background: ${light};
+  white-space: nowrap;
+  padding: ${rem(10)} ${rem(20)};
+  display: flex;
+  font-size: ${rem(14)};
+  border-radius: ${rem(8)};
+  min-height: ${rem(90)};
+  box-shadow: 0 ${rem(2)} ${rem(6)} ${rem(-3)} ${dark};
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const UserMenuItem = styled.div`
+  color: ${grey};
+  display: flex;
+  align-items: center;
+
+  cursor: pointer;
+  &:hover {
+    border-bottom: ${rem(1)} solid;
+  }
+`;
+
+export default Top;

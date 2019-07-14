@@ -1,14 +1,16 @@
 import { createReducer, createAction } from 'redux-starter-kit';
-import { CartItem, Attribute } from 'state/interfaces';
+import { CartItem } from 'state/interfaces';
 
 interface CartState {
   cartId: string;
   items: CartItem[];
+  bag: number;
 }
 
 const initialCartState: CartState = {
   cartId: '',
   items: [],
+  bag: 0,
 };
 
 export const generateCartId = createAction('CART/GENERATE_UNIQUE_ID');
@@ -23,6 +25,14 @@ const cart = createReducer(initialCartState, {
   },
   // @ts-ignore
   [addToCart]: (state, action) => {
+    const bag = action.payload
+      .reduce(
+        (accumulator, currentValue) =>
+          accumulator + Number(currentValue.subtotal),
+        0
+      )
+      .toFixed(2);
+    state.bag = bag;
     state.items = action.payload;
   },
   // @ts-ignore

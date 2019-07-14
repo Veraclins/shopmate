@@ -8,7 +8,7 @@ import Label from 'components/Label';
 import Modal from 'components/Modal';
 import Item from 'components/Item';
 import { Product } from 'state/interfaces';
-import config from 'config';
+import { getImageUrl } from 'helpers/Image';
 
 interface ProductProps {
   product: Product;
@@ -16,21 +16,19 @@ interface ProductProps {
 
 const ProductCard: React.FunctionComponent<ProductProps> = ({ product }) => {
   const [modalOpen, showModal] = useState(false);
-  const imageUrl = `${config.BASE_URL}/images/products/${product.thumbnail}`;
   return (
     <>
       <Card small onClick={() => showModal(true)}>
-        <Image src={imageUrl} />
+        <Image src={getImageUrl(product.thumbnail)} />
         <Name>{product.name}</Name>
         <Price>
-          <OldPrice>£{product.price}</OldPrice>
-          <Label value={`£${product.discounted_price}`} />
+          <Label value={`$${product.price}`} />
         </Price>
         <Description>{product.description.substring(0, 70)}...</Description>
       </Card>
       {modalOpen && (
         <Modal close={() => showModal(false)}>
-          <Item id={product.product_id} />
+          <Item id={product.product_id} close={() => showModal(false)} />
         </Modal>
       )}
     </>

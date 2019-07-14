@@ -1,5 +1,6 @@
 export default {
-  setItem: (name, data) => localStorage.setItem(name, data),
-  getItem: name => localStorage.getItem(name),
+  setItem: (name: string, data: string) => localStorage.setItem(name, data),
+  getItem: (name: string) => localStorage.getItem(name),
+  removeItem: (name: string) => localStorage.removeItem(name),
   clear: () => localStorage.clear(),
 };

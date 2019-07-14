@@ -12,7 +12,12 @@ export const useForm = (initialValues: any, callback) => {
     callback(values);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    event:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLSelectElement>
+  ) => {
     event.persist();
     setValues((values: any) => ({
       ...values,

@@ -12,7 +12,7 @@ import Department from 'pages/Department';
 const routes = (
   <>
     <GlobalStyles />
-    <NavBar theme={themes.white} />
+    <NavBar theme={themes.default} />
     <Switch>
       <Route exact path="/" component={Home} />
       <Route exact path="/:page" component={Home} />

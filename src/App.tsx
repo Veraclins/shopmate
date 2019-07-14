@@ -4,14 +4,20 @@ import { ConnectedRouter } from 'connected-react-router';
 import { History } from 'history';
 
 import routes from 'routes';
+import { connect } from 'react-redux';
+import Loader from 'components/Loader';
 
 interface MainProps {
   history: History;
+  loading?: boolean;
 }
 
-const App: React.FunctionComponent<MainProps> = ({ history }) => (
+const App: React.FunctionComponent<MainProps> = ({ history, loading }) => (
   <ConnectedRouter history={history}>
-    <MainContainer>{routes}</MainContainer>
+    <MainContainer>
+      {routes}
+      {loading && <Loader />}
+    </MainContainer>
   </ConnectedRouter>
 );
 
@@ -24,4 +30,8 @@ const MainContainer = styled.div`
   box-sizing: border-box;
 `;
 
-export default App;
+const mapStateToProps = (state): any => ({
+  loading: state.status.loading,
+});
+
+export default connect(mapStateToProps)(App);

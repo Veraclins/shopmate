@@ -12,12 +12,15 @@ import {
   CartInput,
 } from 'state/interfaces';
 import { connect, useDispatch } from 'react-redux';
-import { useAxios } from 'helpers/hooks';
-import { fetchProduct, fetchAttributes } from 'state/product';
-import config from 'config';
-import Button from './Button';
+import { useAxios, useForm } from 'helpers/hooks';
+import { fetchProduct, fetchAttributes, loadReviews } from 'state/product';
 import api from 'services/api';
 import { addToCart } from 'state/cart';
+import Button from 'components/Button';
+import Form from 'components/Form';
+import Textarea from 'components/Textarea';
+import { changeStatus } from 'state/status';
+import { getImageUrl } from 'helpers/Image';
 
 interface ItemProps {
   id: ProductId;
@@ -26,6 +29,7 @@ interface ItemProps {
   reviews: Review[];
   sizes: Attribute[];
   colors: Attribute[];
+  close: () => void;
 }
 
 const Item: React.FunctionComponent<ItemProps> = ({
@@ -35,24 +39,14 @@ const Item: React.FunctionComponent<ItemProps> = ({
   sizes,
   colors,
   cartId,
+  close,
 }) => {
-  const dispatch = useDispatch();
-
   const [selectedColor, setColor] = useState('White');
   const [selectedSize, setSize] = useState('S');
-
-  const result = useAxios({ url: `products/${id}` }, { product });
-  const attributes = useAxios({ url: `attributes/inProduct/${id}` }, [
-    ...sizes,
-    ...colors,
-  ]);
-
-  if (attributes.length !== [...sizes, ...colors].length) {
-    dispatch(fetchAttributes(attributes));
-  }
-  if (result && result.product_id !== product.product_id) {
-    dispatch(fetchProduct(result));
-  }
+  const dispatch = useDispatch();
+  const submit = data => {
+    console.log(data);
+  };
 
   const addProductToCart = async () => {
     const data: CartInput = {
@@ -60,26 +54,54 @@ const Item: React.FunctionComponent<ItemProps> = ({
       product_id: product.product_id,
       attributes: `${selectedSize}, ${selectedColor}`,
     };
-
-    const response = await api.post('shoppingcart/add', data);
-    dispatch(addToCart(response.data));
+    try {
+      dispatch(changeStatus(true));
+      const response = await api.post('shoppingcart/add', data);
+      dispatch(addToCart(response.data));
+      close();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(changeStatus(false));
+    }
   };
-  const getImageUrl = image =>
-    image && `${config.BASE_URL}/images/products/${image}`;
+
+  const { values, handleChange, handleSubmit } = useForm(
+    { review: '', rating: 5 },
+    submit
+  );
+  const result = useAxios({ url: `products/${id}` }, { product });
+  const productReviews = useAxios({ url: `products/${id}/reviews` }, reviews);
+  const attributes = useAxios({ url: `attributes/inProduct/${id}` }, [
+    ...sizes,
+    ...colors,
+  ]);
+
+  if (productReviews.length !== reviews.length) {
+    dispatch(loadReviews(productReviews));
+  }
+
+  if (attributes.length !== [...sizes, ...colors].length) {
+    dispatch(fetchAttributes(attributes));
+  }
+
+  if (result.product_id !== product.product_id) {
+    dispatch(fetchProduct(result));
+  }
 
   return (
     <StyledItem>
       <MainArea>
         <Preview>
-          <Image src={getImageUrl(product.image)} />
+          <Image src={getImageUrl(product.image)} alt="Item preview" />
           <SmallerImage>
-            <img src={getImageUrl(product.image)} />
-            <img src={getImageUrl(product.image_2)} />
+            <img src={getImageUrl(product.image)} alt="thumbnail" />
+            <img src={getImageUrl(product.image_2)} alt="thumbnail" />
           </SmallerImage>
         </Preview>
         <Details>
           <Name>{product.name}</Name>
-          <Price>£{product.discounted_price}</Price>
+          <Price>${product.discounted_price}</Price>
           <AttributeTitle>Choose color</AttributeTitle>
           <AttributeArea>
             {colors.map(col => (
@@ -111,17 +133,41 @@ const Item: React.FunctionComponent<ItemProps> = ({
           </Button>
         </Details>
       </MainArea>
-      <Title>Product Reviews</Title>
-      <ReviewArea>x</ReviewArea>
-      <Title>You may also like</Title>
-      <Recommended>x</Recommended>
+      <ReviewContainer>
+        <Title>Product Reviews</Title>
+        <ReviewArea>
+          {reviews.map(review => (
+            <Reviews key={Math.random()}>
+              <ReviewLeft>
+                <Name>{review.name}</Name>
+                rating: {review.rating}
+              </ReviewLeft>
+              <ReviewDetail>{review.review}</ReviewDetail>
+            </Reviews>
+          ))}
+        </ReviewArea>
+        <Line />
+        <Title>Add a review</Title>
+        <AddReview>
+          <Form onSubmit={handleSubmit} submitText="Submit Review">
+            <InputControl>
+              <InputLabel>Your review</InputLabel>
+              <ReviewInput
+                type="text"
+                value={values.review}
+                name="review"
+                onChange={handleChange}
+              />
+            </InputControl>
+          </Form>
+        </AddReview>
+      </ReviewContainer>
     </StyledItem>
   );
 };
 
 const StyledItem = styled.div`
-  margin: ${rem(10)};
-  padding: ${rem(16)};
+  padding: ${rem(30)};
   background: ${light};
   box-sizing: border-box;
   display: flex;
@@ -143,13 +189,20 @@ const Title = styled.div`
   font-weight: bold;
 `;
 
+const Line = styled.hr`
+  margin: ${rem(40)} 0 ${rem(20)};
+  width: 100%;
+  font-weight: bold;
+`;
+
 const MainArea = styled.div`
-  text-align: center;
+  padding: ${rem(30)};
   background: ${white};
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  box-shadow: 0 0 ${rem(2)} ${rem(-1)} ${grey};
 
   @media screen and (max-width: ${rem(480)}) {
     width: 100%;
@@ -276,15 +329,12 @@ const SizeButton = styled.button<{ size: string; selectedSize: string }>`
   box-sizing: border-box;
 `;
 
-const ReviewArea = styled.div`
-  text-align: center;
-  background: ${white};
+const ReviewContainer = styled.div`
+  padding: ${rem(60)};
   box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
   flex-direction: column;
-  height: ${rem(200)};
-  justify-content: center;
+  box-shadow: 0 0 ${rem(2)} ${rem(-1)} ${dark};
 
   @media screen and (max-width: ${rem(480)}) {
     width: 100%;
@@ -292,19 +342,96 @@ const ReviewArea = styled.div`
   }
 `;
 
-const Recommended = styled.div`
-  text-align: center;
-  background: ${white};
+const ReviewArea = styled.div`
   box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
   flex-direction: column;
-  justify-content: center;
+  max-height: ${rem(300)};
+  padding-bottom: ${rem(30)};
+  overflow-y: auto;
+  justify-content: space-between;
 
   @media screen and (max-width: ${rem(480)}) {
     width: 100%;
     box-sizing: border-box;
   }
+`;
+
+const Reviews = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  @media screen and (max-width: ${rem(480)}) {
+    width: 100%;
+    box-sizing: border-box;
+  }
+`;
+
+const ReviewLeft = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: space-between;
+
+  @media screen and (max-width: ${rem(480)}) {
+    width: 100%;
+    box-sizing: border-box;
+  }
+`;
+
+const ReviewDetail = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  flex: 3;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+
+  @media screen and (max-width: ${rem(480)}) {
+    width: 100%;
+    box-sizing: border-box;
+  }
+`;
+
+const AddReview = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: space-between;
+
+  @media screen and (max-width: ${rem(480)}) {
+    box-sizing: border-box;
+  }
+`;
+
+const InputControl = styled.div`
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+`;
+
+const InputLabel = styled.div`
+  box-sizing: border-box;
+  min-width: ${rem(100)};
+  flex: 1;
+  display: flex;
+`;
+
+const ReviewInput = styled(Textarea)`
+  margin: ${rem(10)} ${rem(20)};
+  flex: 3;
+  display: flex;
+  padding: ${rem(20)};
+  text-align: left;
 `;
 
 const mapStateToProps = state => ({

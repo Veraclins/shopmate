@@ -1,122 +1,160 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
-import { white, light, dark, brand, grey } from 'styles/colors';
+import { light, dark, brand, lightGrey } from 'styles/colors';
 import { rem } from 'styles';
-import {
-  ProductId,
-  ProductComplete,
-  Review,
-  Attribute,
-} from 'state/interfaces';
+import { CartItem } from 'state/interfaces';
 import { connect, useDispatch } from 'react-redux';
-import { useAxios } from 'helpers/hooks';
-import { fetchProduct, fetchAttributes } from 'state/product';
-import config from 'config';
-import Button from './Button';
+import { getImageUrl } from 'helpers/Image';
+import { FaTimes, FaMinus, FaPlus } from 'react-icons/fa';
+import api from 'services/api';
+import { addToCart } from 'state/cart';
+import { throwError, changeStatus } from 'state/status';
+import Button from 'components/Button';
 
-interface ItemProps {
-  id: ProductId;
-  product: ProductComplete;
-  reviews: Review[];
-  sizes: Attribute[];
-  colors: Attribute[];
+interface CartProps {
+  cartId: string;
+  items: CartItem[];
+  bag: number;
+  close: () => void;
+  openCheckoutForm: () => void;
 }
 
-const Item: React.FunctionComponent<ItemProps> = ({
-  id,
-  product,
-  reviews,
-  sizes,
-  colors,
+const Cart: React.FunctionComponent<CartProps> = ({
+  cartId,
+  items,
+  close,
+  openCheckoutForm,
 }) => {
   const dispatch = useDispatch();
 
-  const [selectedColor, setColor] = useState('White');
-  const [selectedSize, setSize] = useState('S');
-  const [quantity, setQuantity] = useState(1);
+  const loadCart = async () => {
+    try {
+      const response = await api.get(`shoppingcart/${cartId}`);
+      dispatch(addToCart(response.data));
+    } catch (error) {
+      dispatch(throwError(error.message));
+    }
+  };
 
-  const getImageUrl = image => `${config.BASE_URL}/images/products/${image}`;
+  const updateItem = async (itemId, quantity) => {
+    try {
+      dispatch(changeStatus(true));
+      await api.put(`shoppingcart/update/${itemId}`, {
+        quantity,
+      });
+      await loadCart();
+    } catch (error) {
+      dispatch(throwError(error.message));
+    } finally {
+      dispatch(changeStatus(false));
+    }
+  };
 
-  const result = useAxios({ url: `products/${id}` }, { product });
-  const cartId = useAxios({ url: `shoppingcart/generateUniqueId` }, {});
-  const attributes = useAxios({ url: `attributes/inProduct/${id}` }, [
-    ...sizes,
-    ...colors,
-  ]);
+  const removeItem = async itemId => {
+    try {
+      dispatch(changeStatus(true));
+      await api.delete(`shoppingcart/removeProduct/${itemId}`);
+      await loadCart();
+    } catch (error) {
+      dispatch(throwError(error.message));
+    } finally {
+      dispatch(changeStatus(false));
+    }
+  };
 
-  if (attributes.length !== [...sizes, ...colors].length) {
-    dispatch(fetchAttributes(attributes));
-  }
-  if (result && result.product_id !== product.product_id) {
-    dispatch(fetchProduct(result));
-  }
+  const decreaseQuantity = (currentQuantity: number, itemId: number) => {
+    const quantity = currentQuantity - 1;
+    updateItem(itemId, quantity);
+  };
+
+  const increaseQuantity = (currentQuantity: number, itemId: number) => {
+    const quantity = currentQuantity + 1;
+    updateItem(itemId, quantity);
+  };
+
+  const getColorAndSize = (attributes: string) => {
+    const [size, color] = attributes.split(', ');
+    return { size, color };
+  };
 
   return (
-    <StyledItem>
-      <MainArea>
-        <Preview>
-          <Image src={getImageUrl(product.image)} />
-          <SmallerImage>
-            <img src={getImageUrl(product.image)} />
-            <img src={getImageUrl(product.image_2)} />
-          </SmallerImage>
-        </Preview>
-        <Details>
-          <Name>{product.name}</Name>
-          <Price>£{product.discounted_price}</Price>
-          <AttributeTitle>Choose color</AttributeTitle>
-          <AttributeArea>
-            {colors.map(col => (
-              <ColorButton
-                onClick={() => setColor(col.attribute_value)}
-                key={col.attribute_value_id}
-                color={col.attribute_value}
-                selectedColor={selectedColor}
-              />
-            ))}
-          </AttributeArea>
-          <AttributeTitle>Choose size</AttributeTitle>
-          <AttributeArea>
-            {sizes.map(siz => (
-              <SizeButton
-                onClick={() => setSize(siz.attribute_value)}
-                key={siz.attribute_value_id}
-                size={siz.attribute_value}
-                selectedSize={selectedSize}
-              >
-                {siz.attribute_value}
-              </SizeButton>
-            ))}
-          </AttributeArea>
-          <AttributeTitle>Choose quantity</AttributeTitle>
-          <QuantityArea>
-            <QuantityButton
-              disabled={quantity <= 1}
-              onClick={() => setQuantity(quantity - 1)}
-            >
-              -
-            </QuantityButton>
-            <Quantity>{quantity}</Quantity>
-            <QuantityButton onClick={() => setQuantity(quantity + 1)}>
-              +
-            </QuantityButton>
-          </QuantityArea>
-          <Button large>Add to cart</Button>
-        </Details>
-      </MainArea>
-      <Title>Product Reviews</Title>
-      <ReviewArea>x</ReviewArea>
-      <Title>You may also like</Title>
-      <Recommended>x</Recommended>
-    </StyledItem>
+    <>
+      <StyledCart>
+        <Title>{items.length} Items in Your Cart</Title>
+        <Header>
+          <Left>
+            <Text>Items</Text>
+          </Left>
+          <Right>
+            <Text>Size</Text>
+            <Text>Color</Text>
+            <Text>Quantity</Text>
+            <Text>Price</Text>
+          </Right>
+        </Header>
+        <MainArea>
+          {items.map(item => (
+            <Item key={item.item_id}>
+              <Left>
+                <Image>
+                  <img src={getImageUrl(item.image)} alt="item" />
+                </Image>
+                <ItemDetails>
+                  <ItemName>{item.name}</ItemName>
+                  <Remove onClick={() => removeItem(item.item_id)}>
+                    <RemoveButton /> Remove
+                  </Remove>
+                </ItemDetails>
+              </Left>
+              <Right>
+                <Text>{getColorAndSize(item.attributes).size}</Text>
+                <Text>{getColorAndSize(item.attributes).color}</Text>
+                <Text>
+                  <QuantityButton
+                    onClick={() =>
+                      decreaseQuantity(item.quantity, item.item_id)
+                    }
+                  >
+                    <FaMinus />
+                  </QuantityButton>
+                  {item.quantity}
+                  <QuantityButton
+                    onClick={() =>
+                      increaseQuantity(item.quantity, item.item_id)
+                    }
+                  >
+                    <FaPlus />
+                  </QuantityButton>
+                </Text>
+                <Text>
+                  <ItemName>${item.subtotal}</ItemName>
+                </Text>
+              </Right>
+            </Item>
+          ))}
+        </MainArea>
+        <Footer>
+          <CartButton light onClick={close}>
+            Back to shop
+          </CartButton>
+          <CartButton
+            onClick={() => {
+              close();
+              openCheckoutForm();
+            }}
+          >
+            Checkout
+          </CartButton>
+        </Footer>
+      </StyledCart>
+    </>
   );
 };
 
-const StyledItem = styled.div`
-  margin: ${rem(10)};
-  padding: ${rem(16)};
-  background: ${light};
+const StyledCart = styled.div`
+  margin: 0 ${rem(40)};
+  padding: 0 ${rem(16)};
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
@@ -129,18 +167,19 @@ const StyledItem = styled.div`
 `;
 
 const Title = styled.div`
-  margin: ${rem(20)} 0;
+  margin: 0 0 ${rem(40)};
   box-sizing: border-box;
-  font-size: ${rem(20)};
+  font-size: ${rem(28)};
   color: ${dark};
   text-align: left;
   font-weight: bold;
 `;
 
-const MainArea = styled.div`
-  text-align: center;
-  background: ${white};
+const Header = styled.div`
+  align-items: center;
   box-sizing: border-box;
+  border-bottom: ${rem(2)} solid ${lightGrey};
+  padding-bottom: ${rem(10)};
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -151,54 +190,59 @@ const MainArea = styled.div`
   }
 `;
 
-const Preview = styled.div`
-  text-align: center;
-  padding: ${rem(20)} auto;
+const MainArea = styled.div`
   box-sizing: border-box;
   display: flex;
-  flex: 1;
-  flex-wrap: wrap;
   flex-direction: column;
-  justify-content: center;
+  padding-bottom: ${rem(20)};
+  flex-wrap: wrap;
+  justify-content: space-between;
 
   @media screen and (max-width: ${rem(480)}) {
     width: 100%;
     box-sizing: border-box;
-    margin: ${rem(20)} auto;
   }
 `;
 
-const Image = styled.img`
-  display: block;
-  margin: ${rem(10)} auto;
-  min-width: ${rem(200)};
+const Item = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  margin: ${rem(20)} 0 0;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
 
   @media screen and (max-width: ${rem(480)}) {
+    width: 100%;
     box-sizing: border-box;
   }
 `;
 
-const SmallerImage = styled.div`
+const ItemName = styled.div`
+  box-sizing: border-box;
+  font-size: ${rem(18)};
+  color: ${dark};
+  font-weight: bold;
+`;
+
+const Image = styled.div`
   display: flex;
-  margin: ${rem(20)} auto;
   img {
     display: inline-block;
-    width: ${rem(100)};
-    margin: ${rem(5)};
-    @media screen and (max-width: ${rem(480)}) {
-      box-sizing: border-box;
-    }
+    width: ${rem(60)};
+    height: ${rem(60)};
+    padding: ${rem(10)};
+    border: ${rem(0.5)} solid ${lightGrey};
   }
 `;
 
-const Details = styled.div`
-  background: ${white};
+const ItemDetails = styled.div`
   box-sizing: border-box;
+  padding: ${rem(5)} ${rem(15)};
   display: flex;
-  flex: 1;
-  flex-wrap: wrap;
   flex-direction: column;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: space-between;
 
   @media screen and (max-width: ${rem(480)}) {
     width: 100%;
@@ -206,110 +250,63 @@ const Details = styled.div`
   }
 `;
 
-const Name = styled.div`
-  margin: ${rem(10)} 0;
+const Left = styled.div`
   box-sizing: border-box;
-  font-weight: bold;
-  color: ${dark};
-`;
-
-const Price = styled.div`
-  padding: ${rem(5)};
-  font-weight: bold;
-  color: ${brand};
-  text-align: center;
-`;
-
-const AttributeArea = styled.div`
-  margin: ${rem(5)} 0;
   display: flex;
-  align-items: center;
-  font-weight: bold;
-  color: ${brand};
-  text-align: center;
+  flex: 1;
+  justify-content: flex-start;
 `;
 
-const AttributeTitle = styled.div`
-  margin: ${rem(10)} 0;
-  display: flex;
-  font-weight: bold;
-`;
-
-const ColorButton = styled.button<{ color: string; selectedColor: string }>`
-  margin: ${rem(5)};
-  padding: ${rem(2)};
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  outline: none;
-  background: ${({ color }) => color};
-  border: ${({ color, selectedColor }) =>
-    color === selectedColor && `${rem(3)} solid ${grey}`};
-  height: ${({ color, selectedColor }) =>
-    color === selectedColor ? rem(25) : rem(20)};
-  width: ${({ color, selectedColor }) =>
-    color === selectedColor ? rem(25) : rem(20)};
-  text-align: center;
+const Right = styled.div`
   box-sizing: border-box;
-  border-radius: 50%;
+  display: flex;
+  flex: 1;
+  justify-content: flex-start;
 `;
 
-const SizeButton = styled.button<{ size: string; selectedSize: string }>`
-  margin: ${rem(5)};
-  padding: ${rem(3)};
+const Text = styled.div`
+  width: ${rem(120)};
   display: flex;
-  align-items: center;
   justify-content: center;
-  font-weight: bold;
-  outline: none;
-  background: ${({ size, selectedSize }) =>
-    size === selectedSize ? brand : light};
+  align-items: center;
+`;
 
-  width: ${rem(55)};
-  text-align: center;
+const Remove = styled.div`
   box-sizing: border-box;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
 `;
 
-const QuantityArea = styled.div`
-  margin: ${rem(5)} 0;
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  text-align: center;
-`;
-
-const Quantity = styled.div`
-  margin: ${rem(5)} 0;
-  padding: ${rem(3)} ${rem(8)};
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  text-align: center;
+const RemoveButton = styled(FaTimes)`
+  color: ${brand};
 `;
 
 const QuantityButton = styled.button`
-  margin: ${rem(5)};
-  padding: ${rem(3)} ${rem(8)};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  outline: none;
+  padding: ${rem(5)};
+  margin: 0 ${rem(10)};
+  width: ${rem(36)};
+  height: ${rem(36)};
+  color: ${dark};
   background: ${light};
-  border-radius: ${rem(5)};
-  text-align: center;
-  box-sizing: border-box;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  border-radius: 50%;
 `;
 
-const ReviewArea = styled.div`
-  text-align: center;
-  background: ${white};
+const Footer = styled.div`
   box-sizing: border-box;
   display: flex;
+  background: ${light};
+  margin: 0 ${rem(-70)} ${rem(-14)};
+  padding: 0 ${rem(70)};
+  padding-bottom: ${rem(20)};
   flex-wrap: wrap;
-  flex-direction: column;
-  height: ${rem(200)};
-  justify-content: center;
+  justify-content: space-between;
 
   @media screen and (max-width: ${rem(480)}) {
     width: 100%;
@@ -317,26 +314,14 @@ const ReviewArea = styled.div`
   }
 `;
 
-const Recommended = styled.div`
-  text-align: center;
-  background: ${white};
-  box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-  justify-content: center;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
+const CartButton = styled(Button)`
+  margin: ${rem(14)};
 `;
 
 const mapStateToProps = state => ({
-  product: state.product.product,
-  reviews: state.product.reviews,
-  sizes: state.product.attributes.sizes,
-  colors: state.product.attributes.colors,
+  items: state.cart.items,
+  cartId: state.cart.cartId,
+  bag: state.cart.bag,
 });
 
-export default connect(mapStateToProps)(Item);
+export default connect(mapStateToProps)(Cart);

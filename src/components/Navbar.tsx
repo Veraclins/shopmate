@@ -1,32 +1,47 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaShoppingBag, FaSearch, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaTimes } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 
 import { rem } from 'styles';
 import TopBar from 'components/Topbar';
-import Badge from 'components/Badge';
 import Input from 'components/Input';
 import Navigation from 'components/Navigation';
 import { connect } from 'react-redux';
-import { CartItem } from 'state/interfaces';
+import { CartItem, Customer } from 'state/interfaces';
+import CartIcon from 'components/CartIcon';
 
 interface NavbarProps {
   theme: any;
   items: CartItem[];
+  customer: Customer;
+  authenticated?: boolean;
+  bag?: number;
 }
 
 interface MenuProps {
   active: boolean;
 }
 
-const Navbar: React.FunctionComponent<NavbarProps> = ({ theme, items }) => {
+const Navbar: React.FunctionComponent<NavbarProps> = ({
+  theme,
+  items,
+  bag,
+  customer,
+  authenticated,
+}) => {
   const [navActive, toggleNav] = useState(false);
   const [search, setSearch] = useState('');
   const [searchActive, toggleSearch] = useState(false);
   return (
     <>
-      <TopBar theme={theme} items={items} />
+      <TopBar
+        theme={theme}
+        items={items}
+        customer={customer}
+        bag={bag}
+        authenticated={authenticated}
+      />
       <Container theme={theme}>
         <NavLeft>
           <Logo theme={theme}>
@@ -75,9 +90,7 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({ theme, items }) => {
                 <FaSearch onClick={() => toggleSearch(!searchActive)} />
               )}
             </Search>
-            <Badge theme={theme} value={items.length}>
-              <FaShoppingBag />
-            </Badge>
+            <CartIcon theme={theme} customer={customer} items={items} />
           </Icons>
         </NavRight>
       </Container>
@@ -131,7 +144,7 @@ const NavRight = styled.div<MenuProps>`
 `;
 
 const Logo = styled.div`
-  font-size: ${rem(32)};
+  font-size: ${rem(34)};
   color: ${({ theme }) => theme.logoColor};
   letter-spacing: ${rem(10)};
   line-height: 120%;
@@ -218,22 +231,28 @@ const SearchInput = styled(Input)`
   border-radius: ${rem(50)};
   font-size: ${rem(23)};
   font-weight: bold;
-  vertical-align: center;
 `;
 
 const LeftIcon = styled.div`
   position: absolute;
   left: ${rem(25)};
-  top: ${rem(8)};
+  top: 50%;
+  transform: translateY(-50%);
 `;
+
 const RightIcon = styled.div`
   position: absolute;
   right: ${rem(25)};
-  top: ${rem(8)};
+  top: 50%;
+  transform: translateY(-50%);
 `;
 
 const mapStateToProps = state => ({
   items: state.cart.items,
+  pathname: state.router.location.pathname,
+  customer: state.user.customer,
+  authenticated: state.user.authenticated,
+  bag: state.cart.bag,
 });
 
 export default connect(mapStateToProps)(Navbar);

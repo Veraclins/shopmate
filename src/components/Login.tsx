@@ -1,16 +1,38 @@
 import Form from 'components/Form';
 import Input from 'components/Input';
 import { useForm } from 'helpers/hooks';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { rem } from 'styles';
 import { dark, brand } from 'styles/colors';
+import { useDispatch } from 'react-redux';
+import api from 'services/api';
+import { changeStatus, throwError } from 'state/status';
+import { login } from 'state/user';
 
-const Login: React.FunctionComponent<{ signUpAction: () => void }> = ({
+interface LoginUpProps {
+  signUpAction: () => void;
+  close: () => void;
+}
+
+const Login: React.FunctionComponent<LoginUpProps> = ({
   signUpAction,
+  close,
 }) => {
-  const submit = data => {
-    console.log(data);
+  const dispatch = useDispatch();
+  const [errors, setErrors] = useState('');
+  const submit = async data => {
+    try {
+      dispatch(changeStatus(true));
+      const response = await api.post('customers/login', data);
+      dispatch(login(response.data));
+      close();
+    } catch (error) {
+      setErrors(error.message || error.data.error.message);
+      dispatch(throwError(error.message || error.data.error.message));
+    } finally {
+      dispatch(changeStatus(false));
+    }
   };
   const { values, handleChange, handleSubmit } = useForm(
     { email: '', password: '' },
@@ -19,10 +41,17 @@ const Login: React.FunctionComponent<{ signUpAction: () => void }> = ({
 
   return (
     <Container>
-      <Form onSubmit={handleSubmit} title="Sign In" submitText="Sign In">
+      <Form
+        onSubmit={handleSubmit}
+        onFocus={() => setErrors('')}
+        title="Sign In"
+        submitText="Sign In"
+        errors={errors}
+      >
         <LoginInput
           type="email"
           value={values.email}
+          required
           name="email"
           placeholder="Email"
           onChange={handleChange}
@@ -30,6 +59,7 @@ const Login: React.FunctionComponent<{ signUpAction: () => void }> = ({
         <LoginInput
           type="password"
           value={values.password}
+          required
           name="password"
           placeholder="Password"
           onChange={handleChange}

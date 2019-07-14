@@ -6,22 +6,25 @@ import { brand, white } from 'styles/colors';
 interface FormProps {
   title?: string;
   submitText?: string;
-  hasError?: boolean;
+  errors?: string;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onFocus?: (event: React.FormEvent<HTMLFormElement>) => void;
 }
 
 const Form: React.FunctionComponent<FormProps> = ({
   title,
-  hasError,
+  errors,
   onSubmit,
+  onFocus,
   submitText = 'Submit',
   children,
 }) => {
   return (
     <Container>
       {title && <Title>{title}</Title>}
-      <StyledForm hasError={hasError} onSubmit={onSubmit}>
+      <StyledForm errors={errors} onSubmit={onSubmit} onFocus={onFocus}>
         {children}
+        {errors && <ErrorMessage>{errors}</ErrorMessage>}
         <Submit type="submit" value={submitText} />
       </StyledForm>
     </Container>
@@ -46,10 +49,10 @@ const StyledForm = styled.form<Partial<FormProps>>`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: ${({ hasError }) => (hasError ? `${rem(1)} solid ${brand}` : 'none')};
+  border: ${({ errors }) => (errors ? `${rem(1)} solid ${brand}` : 'none')};
   font-family: 'Open Sans', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
   font-weight: bold;
-  border-radius: ${rem(50)};
+  border-radius: ${rem(10)};
   width: 100%;
 
   &::placeholder {
@@ -68,6 +71,13 @@ const Submit = styled.input`
   align-items: center;
   font-weight: bold;
   justify-content: center;
+`;
+
+const ErrorMessage = styled.div`
+  margin: ${rem(10)} auto;
+  text-align: center;
+  font-size: ${rem(12)};
+  color: ${brand};
 `;
 
 const Title = styled.div`

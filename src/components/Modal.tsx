@@ -64,7 +64,6 @@ const Head = styled.div`
 const CloseButton = styled.span`
   padding: ${rem(2)};
   cursor: pointer;
-  vertical-align: center;
   font-size: ${rem(30)};
 `;
 

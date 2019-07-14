@@ -1,27 +1,68 @@
 import Form from 'components/Form';
 import Input from 'components/Input';
 import { useForm } from 'helpers/hooks';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { rem } from 'styles';
 import { brand, dark } from 'styles/colors';
+import { useDispatch } from 'react-redux';
+import api from 'services/api';
+import { login } from 'state/user';
+import { changeStatus, throwError } from 'state/status';
 
-const SignUp: React.FunctionComponent<{ loginAction: () => void }> = ({ loginAction }) => {
-  const submit = data => {
-    console.log(data);
+interface SignUpProps {
+  loginAction: () => void;
+  close: () => void;
+}
+const SignUp: React.FunctionComponent<SignUpProps> = ({
+  loginAction,
+  close,
+}) => {
+  const dispatch = useDispatch();
+  const [errors, setErrors] = useState('');
+  const submit = async data => {
+    if (data.password !== data.confirmPassword) {
+      return setErrors('password and confirm password must match');
+    }
+    try {
+      dispatch(changeStatus(true));
+      const response = await api.post('customers', data);
+      dispatch(login(response.data));
+      close();
+    } catch (error) {
+      setErrors(error.message || error.data.error.message);
+      dispatch(throwError(error.message || error.data.error.message));
+    } finally {
+      dispatch(changeStatus(false));
+    }
   };
   const { values, handleChange, handleSubmit } = useForm(
-    { email: '', password: '', confirmPassword: '' },
+    { name: '', email: '', password: '', confirmPassword: '' },
     submit
   );
 
   return (
     <Container>
-      <Form onSubmit={handleSubmit} title="Sign In">
+      <Form
+        onSubmit={handleSubmit}
+        onFocus={() => setErrors('')}
+        title="Sign Up"
+        submitText="Sign Up"
+        errors={errors}
+      >
+        <SignUpInput
+          type="text"
+          value={values.name}
+          name="name"
+          required
+          placeholder="Name"
+          onChange={handleChange}
+        />
         <SignUpInput
           type="email"
           value={values.email}
           name="email"
+          required
           placeholder="Email"
           onChange={handleChange}
         />
@@ -29,6 +70,8 @@ const SignUp: React.FunctionComponent<{ loginAction: () => void }> = ({ loginAct
           type="password"
           value={values.password}
           name="password"
+          required
+          minLength={6}
           placeholder="Password"
           onChange={handleChange}
         />
@@ -36,7 +79,9 @@ const SignUp: React.FunctionComponent<{ loginAction: () => void }> = ({ loginAct
           type="password"
           value={values.confirmPassword}
           name="confirmPassword"
-          placeholder="Retype password"
+          required
+          minLength={6}
+          placeholder="Password"
           onChange={handleChange}
         />
       </Form>

@@ -21,6 +21,7 @@ const initialProductState: ProductState = {
 
 export const fetchProduct = createAction('PRODUCT/FETCH_PRODUCT');
 export const addReview = createAction('PRODUCT/ADD_REVIEW');
+export const loadReviews = createAction('PRODUCT/LOAD_REVIEWS');
 export const fetchAttributes = createAction('PRODUCT/FETCH_ATTRIBUTES');
 
 const product = createReducer(initialProductState, {
@@ -31,6 +32,10 @@ const product = createReducer(initialProductState, {
   // @ts-ignore
   [addReview]: (state, action) => {
     state.reviews = [...state.reviews, action.payload];
+  },
+  // @ts-ignore
+  [loadReviews]: (state, action) => {
+    state.reviews = action.payload;
   },
   // @ts-ignore
   [fetchAttributes]: (state, action) => {
