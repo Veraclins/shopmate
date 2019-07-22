@@ -60,15 +60,12 @@ const Home: React.FunctionComponent<HomeProps> = ({
   };
   generateUniqueCartId();
   return (
-    <>
-      <StarRating />
-      <Main
-        match={match}
-        products={products}
-        pages={pages}
-        currentPage={currentPage}
-      />
-    </>
+    <Main
+      match={match}
+      products={products}
+      pages={pages}
+      currentPage={currentPage}
+    />
   );
 };
 
