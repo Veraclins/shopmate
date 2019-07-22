@@ -77,7 +77,7 @@ const Container = styled.div`
   padding: 0 ${rem(10)};
   display: flex;
   flex-direction: column;
-  color: ${({ color }) => (color ? color : 'inherit')};
+  color: ${({ color }) => (color ? color : dark)};
   width: 100%;
   align-items: center;
 `;
