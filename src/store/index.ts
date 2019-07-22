@@ -8,15 +8,25 @@ import throttle from 'lodash/throttle';
 import logger from 'redux-logger';
 
 import { saveState, loadState } from 'services/persistState';
-import auth from 'redux/auth';
-import cart from 'redux/cart';
+import user from 'state/user';
+import product from 'state/product';
+import products from 'state/products';
+import categories from 'state/category';
+import status from 'state/status';
+import cart from 'state/cart';
+import modal from 'state/modal';
 
 export const history = createBrowserHistory();
 
 const routerReducer = connectRouter(history);
 const reducer = {
-  auth,
+  user,
+  product,
+  products,
+  categories,
+  status,
   cart,
+  modal,
   router: routerReducer,
 };
 
@@ -38,8 +48,8 @@ const store = configureStore({
 
 store.subscribe(
   throttle(() => {
-    const { auth } = store.getState();
-    saveState({ auth });
+    const { user, cart } = store.getState();
+    saveState({ user, cart });
   }, 1000)
 );
 

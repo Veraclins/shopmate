@@ -1,24 +1,18 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import React from 'react';
-import { Product, Category } from 'state/interfaces';
-import { useAxios } from 'helpers/hooks';
-import { connect, useDispatch } from 'react-redux';
-import { fetchMany } from 'state/products';
 import Main from 'components/Main';
-import { generateCartId } from 'state/cart';
-import api from 'services/api';
-import StarRating from 'components/StarRating';
+import { useAxios } from 'helpers/hooks';
+import { Location } from 'history';
+import React from 'react';
+import { connect, useDispatch } from 'react-redux';
+import { Product } from 'state/interfaces';
+import { fetchMany } from 'state/products';
 
 interface HomeProps {
   products: Product[];
-  categories: Category[];
   count: number;
   pages: number;
-  cartId: string;
   match: any;
-  status: {
-    loading: boolean;
-  };
+  location: Location;
 }
 
 const Home: React.FunctionComponent<HomeProps> = ({
@@ -26,23 +20,13 @@ const Home: React.FunctionComponent<HomeProps> = ({
   count,
   pages,
   match,
-  categories,
-  cartId,
+  location,
 }) => {
-  const { params, path } = match;
+  const { params } = match;
   const currentPage = Number(params.page) || 1;
-  let url = '';
-
-  if (path.includes('categories')) {
-    const category = categories.find(
-      item => item.name.toLowerCase() === params.category
-    );
-    if (category) {
-      url = `products/inCategory/${category.category_id}/?page=${currentPage}`;
-    }
-  } else {
-    url = `products?page=${currentPage}`;
-  }
+  const { search } = location;
+  const searchString = search.split('=')[1];
+  const url = `/products/search?query_string=${searchString}&page=${currentPage}`;
 
   const result = useAxios({ url }, { rows: products, count });
 
@@ -52,18 +36,12 @@ const Home: React.FunctionComponent<HomeProps> = ({
     dispatch(fetchMany(result));
   }
 
-  const generateUniqueCartId = async () => {
-    if (!cartId) {
-      const response = await api.get('shoppingcart/generateUniqueId');
-      dispatch(generateCartId(response.data));
-    }
-  };
-  generateUniqueCartId();
   return (
     <Main
       match={match}
       products={products}
       pages={pages}
+      search={search}
       currentPage={currentPage}
     />
   );
@@ -75,6 +53,7 @@ const mapStateToProps = state => ({
   categories: state.categories.rows,
   pages: state.products.pages,
   cartId: state.cart.cartId,
+  location: state.router.location,
 });
 
 export default connect(mapStateToProps)(Home);
