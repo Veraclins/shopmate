@@ -20,7 +20,7 @@ const Button: React.FunctionComponent<ButtonProps> = ({
   children,
   className,
   light,
-  type,
+  type = 'button',
   disabled,
 }) => (
   <StyledButton

@@ -1,33 +1,37 @@
 import React from 'react';
 import styled from 'styled-components';
 import { rem } from 'styles';
-import { brand, white } from 'styles/colors';
+import {
+  brand,
+  white,
+  brandYellow,
+  brandOrange,
+  dark,
+  grey,
+  lightGrey,
+} from 'styles/colors';
+import Star from './Star';
 
-interface FormProps {
+interface StarRatingProps {
   title?: string;
   submitText?: string;
   errors?: string;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
-  onFocus?: (event: React.FormEvent<HTMLFormElement>) => void;
 }
 
-const Form: React.FunctionComponent<FormProps> = ({
+const StarRating: React.FunctionComponent<StarRatingProps> = ({
   title,
   errors,
-  onSubmit,
-  onFocus,
   submitText = 'Submit',
   children,
 }) => {
   return (
-    <Container>
-      {title && <Title>{title}</Title>}
-      <StyledForm errors={errors} onSubmit={onSubmit} onFocus={onFocus}>
-        {children}
-        {errors && <ErrorMessage>{errors}</ErrorMessage>}
-        <Submit type="submit" value={submitText} />
-      </StyledForm>
-    </Container>
+    <StyledStarRating>
+      <Star />
+      <Star />
+      <Star />
+      <Star />
+      <Star />
+    </StyledStarRating>
   );
 };
 
@@ -42,18 +46,15 @@ const Container = styled.div`
   width: 100%;
 `;
 
-const StyledForm = styled.form<Partial<FormProps>>`
+const StyledStarRating = styled.div<Partial<StarRatingProps>>`
   padding: ${rem(7.5)} ${rem(20)};
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: ${({ errors }) => (errors ? `${rem(1)} solid ${brand}` : 'none')};
-  font-family: 'Open Sans', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
   font-weight: bold;
   border-radius: ${rem(10)};
-  width: 100%;
+  /* width: 100%; */
 
   &::placeholder {
     color: ${({ color }) => color};
@@ -91,4 +92,4 @@ const Title = styled.div`
   align-items: center;
 `;
 
-export default Form;
+export default StarRating;

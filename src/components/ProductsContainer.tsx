@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import React from 'react';
-import styled from 'styled-components';
+import Button from 'components/Button';
 import ProductCard from 'components/ProductCard';
-import { Product } from 'state/interfaces';
-import { rem } from 'styles';
-import { grey, brand, white, light } from 'styles/colors';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import { Product } from 'state/interfaces';
+import { history } from 'store';
+import styled from 'styled-components';
+import { rem } from 'styles';
+import { brand, light, white } from 'styles/colors';
 
 interface ProductsProps {
   products: Product[];
   pages: number;
+  search?: string;
   currentPage: number;
 }
 
@@ -19,32 +21,37 @@ interface LabelProps {
   number?: number;
 }
 
-interface NextProps {
-  current: number;
-  pages: number;
-  number?: number;
-}
-
 const ProductsContainer: React.FunctionComponent<ProductsProps> = ({
   products,
   currentPage,
   pages,
+  search,
 }) => {
   let pageNumbers: number[] = [];
   for (let index = 1; index <= pages; index++) {
     pageNumbers = [...pageNumbers, index];
   }
+  const gotoPage = page => {
+    if (search) {
+      history.push(`/search/${page}${search}`);
+    } else {
+      history.push(page.toString());
+    }
+  };
   return (
     <Container>
       {pages > 1 && (
         <Paginate>
-          <Previous to={`${currentPage - 1 || 1}`} current={currentPage}>
+          <Previous
+            onClick={() => gotoPage(currentPage - 1 || 1)}
+            disabled={currentPage <= 1}
+          >
             <FaAngleLeft />
             Previous
           </Previous>
           {pageNumbers.map(number => (
             <PageLabel
-              to={`${number}`}
+              onClick={() => gotoPage(number)}
               key={number}
               current={currentPage}
               number={number}
@@ -53,9 +60,10 @@ const ProductsContainer: React.FunctionComponent<ProductsProps> = ({
             </PageLabel>
           ))}
           <Next
-            to={`${pages > currentPage ? currentPage + 1 : pages}`}
-            current={currentPage}
-            pages={pages}
+            onClick={() =>
+              gotoPage(pages > currentPage ? currentPage + 1 : pages)
+            }
+            disabled={currentPage >= pages}
           >
             Next
             <FaAngleRight />
@@ -67,13 +75,16 @@ const ProductsContainer: React.FunctionComponent<ProductsProps> = ({
       ))}
       {pages > 1 && (
         <Paginate>
-          <Previous to={`${currentPage - 1 || 1}`} current={currentPage}>
+          <Previous
+            onClick={() => gotoPage(currentPage - 1 || 1)}
+            disabled={currentPage <= 1}
+          >
             <FaAngleLeft />
             Previous
           </Previous>
           {pageNumbers.map(number => (
             <PageLabel
-              to={`${number}`}
+              onClick={() => gotoPage(number)}
               key={number}
               current={currentPage}
               number={number}
@@ -82,9 +93,10 @@ const ProductsContainer: React.FunctionComponent<ProductsProps> = ({
             </PageLabel>
           ))}
           <Next
-            to={`${pages > currentPage ? currentPage + 1 : pages}`}
-            current={currentPage}
-            pages={pages}
+            onClick={() =>
+              gotoPage(pages > currentPage ? currentPage + 1 : pages)
+            }
+            disabled={currentPage >= pages}
           >
             Next
             <FaAngleRight />
@@ -109,11 +121,12 @@ const Paginate = styled.div`
   }
 `;
 
-const PageLabel = styled(Link)<LabelProps>`
+const PageLabel = styled(Button)<LabelProps>`
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 ${rem(10)};
+  padding: ${rem(5)};
   width: ${rem(30)};
   height: ${rem(30)};
   color: ${({ current, number }) => (current === number ? white : 'inherit')};
@@ -127,30 +140,24 @@ const PageLabel = styled(Link)<LabelProps>`
   }
 `;
 
-const Previous = styled(Link)<LabelProps>`
+const Previous = styled(Button)`
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 ${rem(30)};
-  padding: ${rem(5)};
-  color: ${({ current }) => (current > 1 ? brand : 'inherit')};
-  border: ${({ current }) =>
-    current > 1 ? `${rem(1)} solid ${brand}` : `${rem(1)} solid ${grey}`};
+  padding: ${rem(5)} ${rem(10)};
 
   @media screen and (max-width: ${rem(480)}) {
     margin: 0 ${rem(10)};
   }
 `;
 
-const Next = styled(Link)<NextProps>`
+const Next = styled(Button)`
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 ${rem(30)};
-  padding: ${rem(5)};
-  color: ${({ current, pages }) => (current < pages ? brand : 'inherit')};
-  border: ${({ current, pages }) =>
-    current < pages ? `${rem(1)} solid ${brand}` : `${rem(1)} solid ${grey}`};
+  padding: ${rem(5)} ${rem(10)};
 
   @media screen and (max-width: ${rem(480)}) {
     margin: 0 ${rem(10)};

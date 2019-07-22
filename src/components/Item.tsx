@@ -20,7 +20,7 @@ import Button from 'components/Button';
 import Form from 'components/Form';
 import Textarea from 'components/Textarea';
 import { changeStatus } from 'state/status';
-import { getImageUrl } from 'helpers/Image';
+import { getImageUrl } from 'helpers';
 
 interface ItemProps {
   id: ProductId;
@@ -44,7 +44,7 @@ const Item: React.FunctionComponent<ItemProps> = ({
   const [selectedColor, setColor] = useState('White');
   const [selectedSize, setSize] = useState('S');
   const dispatch = useDispatch();
-  const submit = data => {
+  const submitReview = data => {
     console.log(data);
   };
 
@@ -68,7 +68,7 @@ const Item: React.FunctionComponent<ItemProps> = ({
 
   const { values, handleChange, handleSubmit } = useForm(
     { review: '', rating: 5 },
-    submit
+    submitReview
   );
   const result = useAxios({ url: `products/${id}` }, { product });
   const productReviews = useAxios({ url: `products/${id}/reviews` }, reviews);
@@ -102,6 +102,7 @@ const Item: React.FunctionComponent<ItemProps> = ({
         <Details>
           <Name>{product.name}</Name>
           <Price>${product.discounted_price}</Price>
+          <Description>{product.description}</Description>
           <AttributeTitle>Choose color</AttributeTitle>
           <AttributeArea>
             {colors.map(col => (
@@ -173,11 +174,6 @@ const StyledItem = styled.div`
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const Title = styled.div`
@@ -203,11 +199,6 @@ const MainArea = styled.div`
   flex-wrap: wrap;
   justify-content: space-between;
   box-shadow: 0 0 ${rem(2)} ${rem(-1)} ${grey};
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const Preview = styled.div`
@@ -258,17 +249,21 @@ const Details = styled.div`
   flex-wrap: wrap;
   flex-direction: column;
   align-items: flex-start;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const Name = styled.div`
   margin: ${rem(10)} 0;
   box-sizing: border-box;
   font-weight: bold;
+  color: ${dark};
+`;
+
+const Description = styled.div`
+  margin: ${rem(10)} 0;
+  box-sizing: border-box;
+  font-size: ${rem(10)};
+  line-height: normal;
+  text-align: left;
   color: ${dark};
 `;
 
@@ -335,11 +330,6 @@ const ReviewContainer = styled.div`
   display: flex;
   flex-direction: column;
   box-shadow: 0 0 ${rem(2)} ${rem(-1)} ${dark};
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const ReviewArea = styled.div`
@@ -350,11 +340,6 @@ const ReviewArea = styled.div`
   padding-bottom: ${rem(30)};
   overflow-y: auto;
   justify-content: space-between;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const Reviews = styled.div`
@@ -362,11 +347,6 @@ const Reviews = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const ReviewLeft = styled.div`
@@ -377,11 +357,6 @@ const ReviewLeft = styled.div`
   align-items: flex-start;
   flex-direction: column;
   justify-content: space-between;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const ReviewDetail = styled.div`
@@ -393,11 +368,6 @@ const ReviewDetail = styled.div`
   flex-direction: column;
   justify-content: space-between;
   text-align: left;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const AddReview = styled.div`

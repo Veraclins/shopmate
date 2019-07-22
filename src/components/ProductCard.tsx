@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import { dark, brand } from 'styles/colors';
+import { dark } from 'styles/colors';
 import { rem } from 'styles';
 import Card from 'components/Card';
 import Label from 'components/Label';
 import Modal from 'components/Modal';
 import Item from 'components/Item';
 import { Product } from 'state/interfaces';
-import { getImageUrl } from 'helpers/Image';
+import { getImageUrl } from 'helpers';
 
 interface ProductProps {
   product: Product;
@@ -24,7 +24,7 @@ const ProductCard: React.FunctionComponent<ProductProps> = ({ product }) => {
         <Price>
           <Label value={`$${product.price}`} />
         </Price>
-        <Description>{product.description.substring(0, 70)}...</Description>
+        <Description>{product.description.substring(0, 40)}...</Description>
       </Card>
       {modalOpen && (
         <Modal close={() => showModal(false)}>
@@ -55,14 +55,6 @@ const Image = styled.img`
 
 const Price = styled.div`
   display: flex;
-  text-align: center;
-`;
-
-const OldPrice = styled.div`
-  text-decoration: line-through;
-  padding: ${rem(5)};
-  margin: ${rem(5)} auto;
-  color: ${brand};
   text-align: center;
 `;
 

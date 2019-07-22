@@ -5,7 +5,7 @@ import { light, dark, brand, lightGrey } from 'styles/colors';
 import { rem } from 'styles';
 import { CartItem } from 'state/interfaces';
 import { connect, useDispatch } from 'react-redux';
-import { getImageUrl } from 'helpers/Image';
+import { getImageUrl, getColorAndSize } from 'helpers';
 import { FaTimes, FaMinus, FaPlus } from 'react-icons/fa';
 import api from 'services/api';
 import { addToCart } from 'state/cart';
@@ -71,11 +71,6 @@ const Cart: React.FunctionComponent<CartProps> = ({
   const increaseQuantity = (currentQuantity: number, itemId: number) => {
     const quantity = currentQuantity + 1;
     updateItem(itemId, quantity);
-  };
-
-  const getColorAndSize = (attributes: string) => {
-    const [size, color] = attributes.split(', ');
-    return { size, color };
   };
 
   return (
@@ -159,11 +154,6 @@ const StyledCart = styled.div`
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const Title = styled.div`
@@ -183,11 +173,6 @@ const Header = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const MainArea = styled.div`
@@ -197,11 +182,6 @@ const MainArea = styled.div`
   padding-bottom: ${rem(20)};
   flex-wrap: wrap;
   justify-content: space-between;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const Item = styled.div`
@@ -211,11 +191,6 @@ const Item = styled.div`
   align-items: center;
   flex-wrap: wrap;
   justify-content: space-between;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const ItemName = styled.div`
@@ -243,11 +218,6 @@ const ItemDetails = styled.div`
   flex-direction: column;
   flex-wrap: wrap;
   justify-content: space-between;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const Left = styled.div`
@@ -307,11 +277,6 @@ const Footer = styled.div`
   padding-bottom: ${rem(20)};
   flex-wrap: wrap;
   justify-content: space-between;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const CartButton = styled(Button)`

@@ -22,6 +22,7 @@ interface InputProps {
   color?: string;
   error?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyPress?: (event: React.KeyboardEvent) => void;
 }
 
 const Input: React.FunctionComponent<InputProps> = ({
@@ -35,6 +36,7 @@ const Input: React.FunctionComponent<InputProps> = ({
   lightenBy,
   label,
   onChange,
+  onKeyPress,
   minLength,
   readOnly,
   background = white,
@@ -65,6 +67,7 @@ const Input: React.FunctionComponent<InputProps> = ({
         readOnly={readOnly}
         minLength={minLength}
         onChange={onChange}
+        onKeyPress={onKeyPress}
       />
     </Container>
   );

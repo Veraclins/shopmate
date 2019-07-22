@@ -13,7 +13,7 @@ const initialState: UserState = {
 };
 
 export const login = createAction('USER/LOG_IN');
-export const update = createAction('USER/UPDATE_USER');
+export const update = createAction('USER/UPDATE_CUSTOMER');
 export const logout = createAction('USER/LOG_OUT');
 
 const user = createReducer(initialState, {

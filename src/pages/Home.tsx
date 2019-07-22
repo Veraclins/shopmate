@@ -7,6 +7,7 @@ import { fetchMany } from 'state/products';
 import Main from 'components/Main';
 import { generateCartId } from 'state/cart';
 import api from 'services/api';
+import StarRating from 'components/StarRating';
 
 interface HomeProps {
   products: Product[];
@@ -59,12 +60,15 @@ const Home: React.FunctionComponent<HomeProps> = ({
   };
   generateUniqueCartId();
   return (
-    <Main
-      match={match}
-      products={products}
-      pages={pages}
-      currentPage={currentPage}
-    />
+    <>
+      <StarRating />
+      <Main
+        match={match}
+        products={products}
+        pages={pages}
+        currentPage={currentPage}
+      />
+    </>
   );
 };
 

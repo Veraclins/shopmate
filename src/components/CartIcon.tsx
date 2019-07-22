@@ -6,10 +6,13 @@ import Cart from 'components/Cart';
 import Badge from 'components/Badge';
 import Checkout from 'components/Checkout';
 import { Customer, CartItem } from 'state/interfaces';
+import { Elements, StripeProvider } from 'react-stripe-elements';
 
 interface CartIconProps {
   theme: any;
   items: CartItem[];
+  cartId: string;
+  bag: number;
   customer: Customer;
 }
 
@@ -17,6 +20,8 @@ const CartIcon: React.FunctionComponent<CartIconProps> = ({
   theme,
   items,
   customer,
+  bag,
+  cartId,
 }) => {
   const [showCart, setShowCart] = useState(false);
   const [showCheckoutForm, toggleCheckoutForm] = useState(false);
@@ -43,11 +48,17 @@ const CartIcon: React.FunctionComponent<CartIconProps> = ({
       )}
       {showCheckoutForm && (
         <Modal close={() => toggleCheckoutForm(false)}>
-          <Checkout
-            customer={customer}
-            items={items}
-            close={() => toggleCheckoutForm(false)}
-          />
+          <StripeProvider apiKey="pk_test_NcwpaplBCuTL6I0THD44heRe">
+            <Elements>
+              <Checkout
+                customer={customer}
+                items={items}
+                cartId={cartId}
+                bag={bag}
+                close={() => toggleCheckoutForm(false)}
+              />
+            </Elements>
+          </StripeProvider>
         </Modal>
       )}
     </>

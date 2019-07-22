@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import Input from 'components/Input';
 import { useForm } from 'helpers/hooks';
 import { rem } from 'styles';
-import { brand, dark, white, lightGrey, light } from 'styles/colors';
+import { brand, dark, white, lightGrey } from 'styles/colors';
 import api from 'services/api';
 import { update } from 'state/user';
 import { changeStatus } from 'state/status';
@@ -64,108 +64,110 @@ const Profile: React.FunctionComponent<ProfileProps> = ({
   );
 
   return (
-    <>
-      <Container>
-        <Title>Profile</Title>
-        <StyledForm errors={errors} onSubmit={handleSubmit}>
-          <Stepper steps={steps} currentStep={step} />
-          {step === 1 && (
-            <>
-              <InputGroup>
-                <ProfileInput
-                  type="text"
-                  value={values.name}
-                  name="name"
-                  required
-                  placeholder="Name"
-                  label="Name"
-                  onChange={handleChange}
-                />
-                <ProfileInput
-                  type="email"
-                  value={values.email}
-                  name="email"
-                  readOnly
-                  required
-                  placeholder="Email"
-                  label="Email"
-                />
-              </InputGroup>
-              <InputGroup>
-                <ProfileInput
-                  type="password"
-                  value={values.password}
-                  name="password"
-                  placeholder="Password"
-                  label="Password"
-                  onChange={handleChange}
-                />
-                <ProfileInput
-                  type="password"
-                  value={values.confirmPassword}
-                  name="confirmPassword"
-                  placeholder="Repeat password"
-                  label="Repeat password"
-                  onChange={handleChange}
-                />
-              </InputGroup>
-            </>
-          )}
-          {step === 2 && (
-            <>
-              <InputGroup>
-                <ProfileInput
-                  type="tel"
-                  value={values.day_phone}
-                  name="day_phone"
-                  placeholder="Day phone number"
-                  label="Day phone number"
-                  onChange={handleChange}
-                />
-                <ProfileInput
-                  type="tel"
-                  value={values.eve_phone}
-                  name="eve_phone"
-                  placeholder="Evening phone number"
-                  label="Evening phone number"
-                  onChange={handleChange}
-                />
-              </InputGroup>
-              <InputGroup>
-                <ProfileInput
-                  type="tel"
-                  value={values.mob_phone}
-                  name="mob_phone"
-                  placeholder="Mobile phone number"
-                  label="Mobile phone number"
-                  onChange={handleChange}
-                />
-              </InputGroup>
-            </>
-          )}
-          {errors && <ErrorMessage>{errors}</ErrorMessage>}
-          <Footer>
+    <Container>
+      <Title>Profile</Title>
+      <StyledForm
+        errors={errors}
+        onSubmit={handleSubmit}
+        onFocus={() => setErrors('')}
+      >
+        <Stepper steps={steps} currentStep={step} />
+        {step === 1 && (
+          <>
+            <InputGroup>
+              <ProfileInput
+                type="text"
+                value={values.name}
+                name="name"
+                required
+                placeholder="Name"
+                label="Name"
+                onChange={handleChange}
+              />
+              <ProfileInput
+                type="email"
+                value={values.email}
+                name="email"
+                readOnly
+                required
+                placeholder="Email"
+                label="Email"
+              />
+            </InputGroup>
+            <InputGroup>
+              <ProfileInput
+                type="password"
+                value={values.password}
+                name="password"
+                placeholder="Password"
+                label="Password"
+                onChange={handleChange}
+              />
+              <ProfileInput
+                type="password"
+                value={values.confirmPassword}
+                name="confirmPassword"
+                placeholder="Repeat password"
+                label="Repeat password"
+                onChange={handleChange}
+              />
+            </InputGroup>
+          </>
+        )}
+        {step === 2 && (
+          <>
+            <InputGroup>
+              <ProfileInput
+                type="tel"
+                value={values.day_phone}
+                name="day_phone"
+                placeholder="Day phone number"
+                label="Day phone number"
+                onChange={handleChange}
+              />
+              <ProfileInput
+                type="tel"
+                value={values.eve_phone}
+                name="eve_phone"
+                placeholder="Evening phone number"
+                label="Evening phone number"
+                onChange={handleChange}
+              />
+            </InputGroup>
+            <InputGroup>
+              <ProfileInput
+                type="tel"
+                value={values.mob_phone}
+                name="mob_phone"
+                placeholder="Mobile phone number"
+                label="Mobile phone number"
+                onChange={handleChange}
+              />
+            </InputGroup>
+          </>
+        )}
+        {errors && <ErrorMessage>{errors}</ErrorMessage>}
+        <Footer>
+          <InputButton
+            light
+            onClick={() => setStep(step - 1)}
+            disabled={step <= 1}
+          >
+            Previous
+          </InputButton>
+          {step < steps.length ? (
             <InputButton
-              light
-              onClick={() => setStep(step - 1)}
-              disabled={step <= 1}
+              onClick={() => setStep(step + 1)}
+              disabled={step >= steps.length}
             >
-              Previous
+              Next
             </InputButton>
-            {step < steps.length ? (
-              <InputButton
-                onClick={() => setStep(step + 1)}
-                disabled={step >= steps.length}
-              >
-                Next
-              </InputButton>
-            ) : (
-              <Submit type="submit" value="Update Profile" />
-            )}
-          </Footer>
-        </StyledForm>
-      </Container>
-    </>
+          ) : (
+            <Submit type="submit" value="Update Profile" />
+          )}
+        </Footer>
+      </StyledForm>
+    </Container>
   );
 };
 
@@ -175,7 +177,7 @@ export const Container = styled.div`
   justify-content: center;
   flex-direction: column;
   box-sizing: border-box;
-  color: ${({ color }) => (color ? color : 'inherit')};
+  color: ${({ color }) => (color ? color : lightGrey)};
   width: 100%;
 `;
 

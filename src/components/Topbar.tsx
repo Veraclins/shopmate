@@ -21,13 +21,15 @@ interface TopBarProps {
   theme?: any;
   customer: Customer;
   authenticated?: boolean;
-  bag?: number;
+  cartId: string;
+  bag: number;
 }
 
 const Top: React.FunctionComponent<TopBarProps> = ({
   theme,
   items,
   bag,
+  cartId,
   customer,
   authenticated,
 }) => {
@@ -98,7 +100,13 @@ const Top: React.FunctionComponent<TopBarProps> = ({
         </Currency>
         <Details>
           <Cart>
-            <CartIcon theme={badge} customer={customer} items={items} />
+            <CartIcon
+              theme={badge}
+              customer={customer}
+              items={items}
+              cartId={cartId}
+              bag={bag}
+            />
           </Cart>
           Your bag: ${bag}
         </Details>

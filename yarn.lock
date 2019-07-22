@@ -1654,6 +1654,14 @@
     "@types/history" "*"
     "@types/react" "*"
 
+"@types/react-stripe-elements@^1.1.10":
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/@types/react-stripe-elements/-/react-stripe-elements-1.1.10.tgz#c224a6bc1b1638ff94b84c881758d534defeff64"
+  integrity sha512-FcGRb2Rwolgx6/epqnZ4ZOMHTx6wUBhkVFWWvob46fBBece3cvxCaP/vPFhf3+dUHfQeITCjMEavdB6rrbZFzg==
+  dependencies:
+    "@types/react" "*"
+    "@types/stripe-v3" "*"
+
 "@types/react@*":
   version "16.8.23"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.8.23.tgz#ec6be3ceed6353a20948169b6cb4c97b65b97ad2"
@@ -1674,6 +1682,11 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-1.0.1.tgz#0a851d3bd96498fa25c33ab7278ed3bd65f06c3e"
   integrity sha512-l42BggppR6zLmpfU6fq9HEa2oGPEI8yrSPL3GITjfRInppYFahObbIQOQK3UGxEnyQpltZLaPe75046NOZQikw==
+
+"@types/stripe-v3@*":
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/@types/stripe-v3/-/stripe-v3-3.1.5.tgz#c428569ab2456f595ccc5ca362e90f134c34385f"
+  integrity sha512-n6Jr/SN7isBFDLkTCwwY4vnBAlwQsMN8zP5htk+3gXBxAD+y8VpcRyPcAoymi14HcOpxGPtRP5pMDmfQMhCfig==
 
 "@types/styled-components@^4.1.16":
   version "4.1.16"
@@ -8959,10 +8972,10 @@ react-scripts@3.0.1:
   optionalDependencies:
     fsevents "2.0.6"
 
-react-stripe-elements@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/react-stripe-elements/-/react-stripe-elements-3.0.0.tgz#8b5e354e6e421b85f909329c9818a719b132410a"
-  integrity sha512-ouGHPmPhdg7KUTOFVuYIr0UWVgBjG5CqmOn9/y0vaJICryPB6llkiOGeUXKrac7fu1/vtPdn8t/4JKnbi8PT8g==
+react-stripe-elements@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/react-stripe-elements/-/react-stripe-elements-4.0.0.tgz#541561cb27498b8355fe3273bb68030beae7439e"
+  integrity sha512-/GK7oMJSp06gNww/3vp7BHie3VavjaCa2m7IQ+it7QLcPTGaG+sTVFz2tRz9OGKlcM2HqqTiutrNwYfRRK+YIw==
   dependencies:
     prop-types "^15.5.10"
 

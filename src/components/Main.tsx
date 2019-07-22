@@ -11,6 +11,7 @@ interface MainProps {
   products: Product[];
   pages: number;
   currentPage: number;
+  search?: string;
   match: any;
 }
 
@@ -18,6 +19,7 @@ const Main: React.FunctionComponent<MainProps> = ({
   products,
   pages,
   match,
+  search,
   currentPage,
 }) => {
   return (
@@ -26,6 +28,7 @@ const Main: React.FunctionComponent<MainProps> = ({
       <StyledMain>
         <ProductsContainer
           products={products}
+          search={search}
           pages={pages}
           currentPage={currentPage}
         />

@@ -47,11 +47,6 @@ const StyledModal = styled.div<Partial<ModalProps>>`
   box-shadow: 0 ${rem(20)} ${rem(60)} ${rem(-6)} ${dark};
   flex-direction: column;
   justify-content: flex-start;
-
-  @media screen and (max-width: ${rem(480)}) {
-    width: 100%;
-    box-sizing: border-box;
-  }
 `;
 
 const Head = styled.div`

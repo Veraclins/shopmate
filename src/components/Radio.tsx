@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { rem } from 'styles';
-import { lightGrey, lighten, white, fade, dark } from 'styles/colors';
+import { lightGrey, dark } from 'styles/colors';
 
 interface RadioProps {
   options: {
@@ -12,8 +12,9 @@ interface RadioProps {
   name: string;
   horizontal?: boolean;
   required?: boolean;
-  readOnly?: boolean;
+  selected?: string | number;
   className?: string;
+  checked?: boolean;
   color?: string;
   error?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -25,8 +26,8 @@ const Radio: React.FunctionComponent<RadioProps> = ({
   required,
   color,
   name,
+  selected,
   onChange,
-  readOnly,
   className,
 }) => {
   return (
@@ -38,9 +39,9 @@ const Radio: React.FunctionComponent<RadioProps> = ({
             value={option.value}
             name={name}
             className={className}
+            checked={selected === option.value}
             color={color}
             required={required}
-            readOnly={readOnly}
             onChange={onChange}
           />
           <Label>{option.label}</Label>

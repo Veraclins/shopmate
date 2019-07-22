@@ -92,7 +92,11 @@ const Address: React.FunctionComponent<AddressProps> = ({
     <>
       <Container>
         <Title>Update Address</Title>
-        <StyledForm errors={errors} onSubmit={handleSubmit}>
+        <StyledForm
+          errors={errors}
+          onSubmit={handleSubmit}
+          onFocus={() => setErrors('')}
+        >
           <Stepper steps={steps} currentStep={step} />
           {step === 1 && (
             <>
@@ -166,7 +170,11 @@ const Address: React.FunctionComponent<AddressProps> = ({
           )}
           {errors && <ErrorMessage>{errors}</ErrorMessage>}
           <Footer>
-            <InputButton onClick={() => setStep(step - 1)} disabled={step <= 1}>
+            <InputButton
+              light
+              onClick={() => setStep(step - 1)}
+              disabled={step <= 1}
+            >
               Previous
             </InputButton>
             {step < steps.length ? (

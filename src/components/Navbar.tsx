@@ -11,12 +11,15 @@ import { connect } from 'react-redux';
 import { CartItem, Customer } from 'state/interfaces';
 import CartIcon from 'components/CartIcon';
 
+import { history } from 'store';
+
 interface NavbarProps {
   theme: any;
   items: CartItem[];
   customer: Customer;
   authenticated?: boolean;
-  bag?: number;
+  bag: number;
+  cartId: string;
 }
 
 interface MenuProps {
@@ -27,12 +30,25 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
   theme,
   items,
   bag,
+  cartId,
   customer,
   authenticated,
 }) => {
   const [navActive, toggleNav] = useState(false);
   const [search, setSearch] = useState('');
   const [searchActive, toggleSearch] = useState(false);
+
+  const searchProduct = async () => {
+    if (!search) return;
+    history.push(`/search?query_string=${search}`);
+  };
+
+  const onKeyPress = e => {
+    if (e.which === 13) {
+      searchProduct();
+    }
+  };
+
   return (
     <>
       <TopBar
@@ -40,6 +56,7 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
         items={items}
         customer={customer}
         bag={bag}
+        cartId={cartId}
         authenticated={authenticated}
       />
       <Container theme={theme}>
@@ -67,7 +84,7 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
               {searchActive && (
                 <>
                   <LeftIcon>
-                    <FaSearch />
+                    <FaSearch onClick={() => searchProduct()} />
                   </LeftIcon>
                   <SearchInput
                     type="text"
@@ -77,6 +94,7 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
                     hasLeftIcon
                     hasRightIcon
                     onChange={e => setSearch(e.target.value)}
+                    onKeyPress={e => onKeyPress(e)}
                     background={theme.background}
                     lightenBy={0.4}
                     color={theme.color}
@@ -90,7 +108,13 @@ const Navbar: React.FunctionComponent<NavbarProps> = ({
                 <FaSearch onClick={() => toggleSearch(!searchActive)} />
               )}
             </Search>
-            <CartIcon theme={theme} customer={customer} items={items} />
+            <CartIcon
+              theme={theme}
+              customer={customer}
+              items={items}
+              cartId={cartId}
+              bag={bag}
+            />
           </Icons>
         </NavRight>
       </Container>
@@ -249,6 +273,7 @@ const RightIcon = styled.div`
 
 const mapStateToProps = state => ({
   items: state.cart.items,
+  cartId: state.cart.cartId,
   pathname: state.router.location.pathname,
   customer: state.user.customer,
   authenticated: state.user.authenticated,
