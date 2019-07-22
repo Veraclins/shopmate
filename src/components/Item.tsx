@@ -101,7 +101,7 @@ const Item: React.FunctionComponent<ItemProps> = ({
         </Preview>
         <Details>
           <Name>{product.name}</Name>
-          <Price>${product.discounted_price}</Price>
+          <Price>${product.price}</Price>
           <Description>{product.description}</Description>
           <AttributeTitle>Choose color</AttributeTitle>
           <AttributeArea>
@@ -261,7 +261,7 @@ const Name = styled.div`
 const Description = styled.div`
   margin: ${rem(10)} 0;
   box-sizing: border-box;
-  font-size: ${rem(10)};
+  font-size: ${rem(13)};
   line-height: normal;
   text-align: left;
   color: ${dark};
