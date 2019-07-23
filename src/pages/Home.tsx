@@ -7,7 +7,6 @@ import { fetchMany } from 'state/products';
 import Main from 'components/Main';
 import { generateCartId } from 'state/cart';
 import api from 'services/api';
-import StarRating from 'components/StarRating';
 
 interface HomeProps {
   products: Product[];

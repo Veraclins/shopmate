@@ -21,12 +21,15 @@ import Form from 'components/Form';
 import Textarea from 'components/Textarea';
 import { changeStatus } from 'state/status';
 import { getImageUrl } from 'helpers';
+import StarRating from './StarRating';
 
 interface ItemProps {
   id: ProductId;
   cartId: string;
   product: ProductComplete;
   reviews: Review[];
+  rating: number;
+  newRating: number;
   sizes: Attribute[];
   colors: Attribute[];
   close: () => void;
@@ -36,6 +39,8 @@ const Item: React.FunctionComponent<ItemProps> = ({
   id,
   product,
   reviews,
+  rating,
+  newRating,
   sizes,
   colors,
   cartId,
@@ -43,9 +48,29 @@ const Item: React.FunctionComponent<ItemProps> = ({
 }) => {
   const [selectedColor, setColor] = useState('White');
   const [selectedSize, setSize] = useState('S');
+  const [errors, setErrors] = useState('');
+
   const dispatch = useDispatch();
-  const submitReview = data => {
-    console.log(data);
+
+  const submitReview = async data => {
+    if (!data.review) return setErrors('Please add your review first!');
+    if (!newRating) return setErrors('Please select your rating (stars) first');
+
+    const values = {
+      review: data.review,
+      rating: newRating,
+    };
+    try {
+      dispatch(changeStatus(true));
+      await api.post(`products/${product.product_id}/reviews`, values);
+      const response = await api.get(`products/${product.product_id}/reviews`);
+      dispatch(loadReviews(response.data));
+      close();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(changeStatus(false));
+    }
   };
 
   const addProductToCart = async () => {
@@ -67,7 +92,7 @@ const Item: React.FunctionComponent<ItemProps> = ({
   };
 
   const { values, handleChange, handleSubmit } = useForm(
-    { review: '', rating: 5 },
+    { review: '' },
     submitReview
   );
   const result = useAxios({ url: `products/${id}` }, { product });
@@ -77,7 +102,7 @@ const Item: React.FunctionComponent<ItemProps> = ({
     ...colors,
   ]);
 
-  if (productReviews.length !== reviews.length) {
+  if (productReviews.length > reviews.length) {
     dispatch(loadReviews(productReviews));
   }
 
@@ -100,6 +125,7 @@ const Item: React.FunctionComponent<ItemProps> = ({
           </SmallerImage>
         </Preview>
         <Details>
+          <StarRating rating={rating} />
           <Name>{product.name}</Name>
           <Price>${product.price}</Price>
           <Description>{product.description}</Description>
@@ -140,8 +166,8 @@ const Item: React.FunctionComponent<ItemProps> = ({
           {reviews.map(review => (
             <Reviews key={Math.random()}>
               <ReviewLeft>
+                <StarRating size="small" rating={review.rating} />
                 <Name>{review.name}</Name>
-                rating: {review.rating}
               </ReviewLeft>
               <ReviewDetail>{review.review}</ReviewDetail>
             </Reviews>
@@ -150,7 +176,15 @@ const Item: React.FunctionComponent<ItemProps> = ({
         <Line />
         <Title>Add a review</Title>
         <AddReview>
-          <Form onSubmit={handleSubmit} submitText="Submit Review">
+          <Form
+            onSubmit={handleSubmit}
+            submitText="Submit Review"
+            errors={errors}
+          >
+            <NewRating>
+              <InputLabel>Your rating</InputLabel>
+              <StarRating rate rating={newRating} />
+            </NewRating>
             <InputControl>
               <InputLabel>Your review</InputLabel>
               <ReviewInput
@@ -253,8 +287,10 @@ const Details = styled.div`
 
 const Name = styled.div`
   margin: ${rem(10)} 0;
+  font-size: ${rem(20)};
   box-sizing: border-box;
   font-weight: bold;
+  text-align: left;
   color: ${dark};
 `;
 
@@ -346,6 +382,7 @@ const Reviews = styled.div`
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
+  padding-bottom: ${rem(10)};
   justify-content: space-between;
 `;
 
@@ -356,7 +393,7 @@ const ReviewLeft = styled.div`
   flex: 1;
   align-items: flex-start;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
 `;
 
 const ReviewDetail = styled.div`
@@ -388,6 +425,14 @@ const InputControl = styled.div`
   display: flex;
   align-items: center;
 `;
+const NewRating = styled.div`
+  margin: ${rem(20)} 0;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  align-self: flex-start;
+`;
 
 const InputLabel = styled.div`
   box-sizing: border-box;
@@ -407,6 +452,8 @@ const ReviewInput = styled(Textarea)`
 const mapStateToProps = state => ({
   product: state.product.product,
   reviews: state.product.reviews,
+  rating: state.product.rating,
+  newRating: state.product.newRating,
   sizes: state.product.attributes.sizes,
   colors: state.product.attributes.colors,
   cartId: state.cart.cartId,

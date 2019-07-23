@@ -4,6 +4,8 @@ import { ProductComplete, Review, Attribute } from 'state/interfaces';
 interface ProductState {
   product: ProductComplete | {};
   reviews: Review[];
+  rating: number;
+  newRating: number;
   attributes: {
     colors: Attribute[];
     sizes: Attribute[];
@@ -13,6 +15,8 @@ interface ProductState {
 const initialProductState: ProductState = {
   product: {},
   reviews: [],
+  rating: 0,
+  newRating: 0,
   attributes: {
     colors: [],
     sizes: [],
@@ -20,7 +24,7 @@ const initialProductState: ProductState = {
 };
 
 export const fetchProduct = createAction('PRODUCT/FETCH_PRODUCT');
-export const addReview = createAction('PRODUCT/ADD_REVIEW');
+export const rateProduct = createAction('PRODUCT/RATE_PRODUCT');
 export const loadReviews = createAction('PRODUCT/LOAD_REVIEWS');
 export const fetchAttributes = createAction('PRODUCT/FETCH_ATTRIBUTES');
 
@@ -30,12 +34,26 @@ const product = createReducer(initialProductState, {
     state.product = action.payload;
   },
   // @ts-ignore
-  [addReview]: (state, action) => {
-    state.reviews = [...state.reviews, action.payload];
+  [loadReviews]: (state, action) => {
+    const reviews = action.payload;
+    const total = reviews
+      .reduce((accumulator, currentValue) => {
+        // I noticed that some reviews have negative ratings as low as -3000
+        // some have ratings as high as 1000.
+        // Since I am using the 5 star rating setup, it is necessary to restrict values between 0 and 5
+
+        const positive = Math.abs(Number(currentValue.rating));
+        const value = positive <= 5 ? positive : 5;
+        return accumulator + value;
+      }, 0)
+      .toFixed(2);
+    const rating = reviews.length ? Number(total) / reviews.length : 0;
+    state.reviews = reviews;
+    state.rating = rating;
   },
   // @ts-ignore
-  [loadReviews]: (state, action) => {
-    state.reviews = action.payload;
+  [rateProduct]: (state, action) => {
+    state.newRating = action.payload;
   },
   // @ts-ignore
   [fetchAttributes]: (state, action) => {
