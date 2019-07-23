@@ -32,6 +32,10 @@ Writing css/scss is great, but writing css directly in your components is in my 
 
 It is a know fact that react functional components perform better and are easier to manage than class components. This is why the introduction of hooks to react may be one of the best things to happen to the framework. This is why I decided to go purely functional and use react hooks in this application. Every component in this application is just a function.
 
+### Performance Improvement (PWA)
+
+Using a service worker, this application caches its dependencies, this improves performance as assets are only downloaded once and reused subsequently.
+
 ## Installation
 
 To run the app locally, setup a local development environment. Ensure that [`Nodejs`](https://nodejs.org/en/download/) and a package manager such as [`yarn`](https://yarnpkg.com/en/docs/install/) or `npm` (comes with node) are installed on your machine.
@@ -44,4 +48,4 @@ To run the app locally, setup a local development environment. Ensure that [`Nod
 
 ## Deployment
 
-The application is hosted on heroku: https://clinton-shop.herokuapp.com/
+The application is hosted on heroku: [click here](https://clinton-shop.herokuapp.com/)
