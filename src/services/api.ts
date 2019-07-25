@@ -1,8 +1,9 @@
 import axios from 'axios';
 import config from 'config';
-import { getAuthToken } from 'helpers/auth';
-import store, { history } from 'store';
+import { getAuthToken, INVALID_SESSION } from 'helpers/auth';
+import store from 'store';
 import { logout } from 'state/user';
+import { toast } from 'react-toastify';
 
 const instance = axios.create({
   baseURL: config.BASE_URL,
@@ -20,7 +21,7 @@ instance.interceptors.response.use(
     const formatedError = error.response ? error.response : error;
     if (formatedError.data.error === 'TokenExpiredError: jwt expired') {
       store.dispatch(logout());
-      history.push('/');
+      toast.error(INVALID_SESSION);
     }
     throw formatedError;
   }

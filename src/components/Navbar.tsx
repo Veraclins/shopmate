@@ -17,7 +17,7 @@ interface NavbarProps {
   theme: any;
   items: CartItem[];
   customer: Customer;
-  authenticated?: boolean;
+  authenticated: boolean;
   bag: number;
   cartId: string;
 }

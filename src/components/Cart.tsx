@@ -252,7 +252,7 @@ const RemoveButton = styled(FaTimes)`
   color: ${brand};
 `;
 
-const QuantityButton = styled.button`
+export const QuantityButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;

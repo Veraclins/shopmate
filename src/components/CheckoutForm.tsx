@@ -8,14 +8,13 @@ import {
 } from 'react-stripe-elements';
 import styled from 'styled-components';
 import { rem } from 'styles';
-import { brand, light, lightGrey, white } from 'styles/colors';
+import { brand, lightGrey, white } from 'styles/colors';
 
 const createOptions = (fontSize: string, padding?: string) => ({
   style: {
     base: {
       fontSize,
       color: '#424770',
-      minWidth: '300px',
       letterSpacing: '0.025em',
       fontFamily: 'Source Code Pro, monospace',
       '::placeholder': {
@@ -50,12 +49,10 @@ const StripeElement: React.FunctionComponent<
 
 const CardLabel = styled.label`
   padding: ${rem(10)};
-  /* background: ${light}; */
   color: ${({ color }) => (color ? color : 'inherit')};
   box-sizing: border-box;
   text-align: left;
   min-width: ${rem(300)};
-
 
   @media screen and (max-width: ${rem(480)}) {
     width: 100%;

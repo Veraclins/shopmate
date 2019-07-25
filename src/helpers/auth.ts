@@ -1,17 +1,30 @@
 import storage from 'helpers/storage';
 
+export const ACCESS_TOKEN = 'accessToken';
+export const EXPIRES_IN = 'expiresIn';
+export const INVALID_SESSION =
+  'You are not logged in, or your session has expired! Please login';
+
 export const setAuthToken = (token: string) =>
-  storage.setItem('accessToken', token);
+  storage.setItem(ACCESS_TOKEN, token);
 
 export const setExpiryTime = (expiresIn: string) => {
-  const expiresInMiliSeconds =
-    Number(expiresIn.substring(0, 1)) * 60 * 60 * 1000;
-  storage.setItem('expiresIn', `${expiresInMiliSeconds}`);
+  storage.setItem(
+    EXPIRES_IN,
+    `${Number(expiresIn.substring(0, 2)) * 60 * 60 * 1000 +
+      new Date().getTime()}`
+  );
 };
 
-export const getAuthToken = () => storage.getItem('accessToken');
+export const getAuthToken = () => storage.getItem(ACCESS_TOKEN);
+export const getExpiryTime = () => storage.getItem(EXPIRES_IN);
 
 export const clearAuth = () => {
-  storage.removeItem('accessToken');
-  storage.removeItem('expiresIn');
+  storage.removeItem(ACCESS_TOKEN);
+  storage.removeItem(EXPIRES_IN);
 };
+
+export const isValidSession = () =>
+  [EXPIRES_IN, ACCESS_TOKEN].every(
+    item => localStorage.getItem(item) !== null
+  ) && new Date().getTime() < Number(getExpiryTime());

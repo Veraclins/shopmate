@@ -17,7 +17,7 @@ import { useAxios, useForm } from 'helpers/hooks';
 import api from 'services/api';
 import { Customer, CartItem } from 'state/interfaces';
 import { changeStatus } from 'state/status';
-import { update } from 'state/user';
+import { update, logout } from 'state/user';
 import { rem } from 'styles';
 import Input from 'components/Input';
 import { lightGrey, dark, brand } from 'styles/colors';
@@ -27,6 +27,9 @@ import { getColorAndSize, checkRequiredFields } from 'helpers';
 import CheckoutForm from './CheckoutForm';
 import { injectStripe, ReactStripeElements } from 'react-stripe-elements';
 import rocket from 'assets/icons-rocket.png';
+import { isValidSession, INVALID_SESSION } from 'helpers/auth';
+import { toast } from 'react-toastify';
+import { history } from 'store';
 
 interface CheckoutProps {
   close: () => void;
@@ -86,6 +89,12 @@ const Checkout: React.FunctionComponent<
     ]);
     if (requiredErrors) return setErrors(requiredErrors);
     try {
+      const hasSession = isValidSession();
+      if (!hasSession) {
+        dispatch(logout());
+        toast.error(INVALID_SESSION);
+        return history.push('/');
+      }
       dispatch(changeStatus(true));
       if (stripe) {
         const payload = await stripe.createToken();
@@ -384,6 +393,7 @@ const CheckoutSelect = styled(Select)`
 
 const InputGroup = styled.div`
   display: flex;
+  color: ${dark};
   justify-content: center;
   margin: ${rem(10)} ${rem(10)};
   box-sizing: border-box;
