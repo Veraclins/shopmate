@@ -8,11 +8,14 @@ import { useForm } from 'helpers/hooks';
 import { rem } from 'styles';
 import { brand, dark, white, lightGrey } from 'styles/colors';
 import api from 'services/api';
-import { update } from 'state/user';
+import { update, logout } from 'state/user';
 import { changeStatus } from 'state/status';
 import { Customer } from 'state/interfaces';
 import Button from 'components/Button';
 import Stepper from 'components/Stepper';
+import { isValidSession, INVALID_SESSION } from 'helpers/auth';
+import { toast } from 'react-toastify';
+import { history } from 'store';
 
 interface ProfileProps {
   close: () => void;
@@ -38,6 +41,12 @@ const Profile: React.FunctionComponent<ProfileProps> = ({
       valueToSubmit = others;
     } else {
       valueToSubmit = data;
+    }
+    const hasSession = isValidSession();
+    if (!hasSession) {
+      dispatch(logout());
+      toast.error(INVALID_SESSION);
+      return history.push('/');
     }
     try {
       dispatch(changeStatus(true));

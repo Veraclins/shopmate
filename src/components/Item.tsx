@@ -22,6 +22,12 @@ import Textarea from 'components/Textarea';
 import { changeStatus } from 'state/status';
 import { getImageUrl } from 'helpers';
 import StarRating from './StarRating';
+import { isValidSession, INVALID_SESSION } from 'helpers/auth';
+import { logout } from 'state/user';
+import { history } from 'store';
+import { toast } from 'react-toastify';
+import { QuantityButton } from './Cart';
+import { FaMinus, FaPlus } from 'react-icons/fa';
 
 interface ItemProps {
   id: ProductId;
@@ -48,9 +54,21 @@ const Item: React.FunctionComponent<ItemProps> = ({
 }) => {
   const [selectedColor, setColor] = useState('White');
   const [selectedSize, setSize] = useState('S');
+  const [quantity, setQuantity] = useState(1);
   const [errors, setErrors] = useState('');
 
   const dispatch = useDispatch();
+
+  const decreaseQuantity = (currentQuantity: number) => {
+    if (currentQuantity <= 1) return;
+    const quantity = currentQuantity - 1;
+    setQuantity(quantity);
+  };
+
+  const increaseQuantity = (currentQuantity: number) => {
+    const quantity = currentQuantity + 1;
+    setQuantity(quantity);
+  };
 
   const submitReview = async data => {
     if (!data.review) return setErrors('Please add your review first!');
@@ -60,6 +78,12 @@ const Item: React.FunctionComponent<ItemProps> = ({
       review: data.review,
       rating: newRating,
     };
+    const hasSession = isValidSession();
+    if (!hasSession) {
+      dispatch(logout());
+      toast.error(INVALID_SESSION);
+      return history.push('/');
+    }
     try {
       dispatch(changeStatus(true));
       await api.post(`products/${product.product_id}/reviews`, values);
@@ -81,8 +105,10 @@ const Item: React.FunctionComponent<ItemProps> = ({
     };
     try {
       dispatch(changeStatus(true));
-      const response = await api.post('shoppingcart/add', data);
-      dispatch(addToCart(response.data));
+      for (let index = 0; index < quantity; index++) {
+        const response = await api.post('shoppingcart/add', data);
+        dispatch(addToCart(response.data));
+      }
       close();
     } catch (error) {
       console.log(error);
@@ -154,7 +180,15 @@ const Item: React.FunctionComponent<ItemProps> = ({
             ))}
           </AttributeArea>
           <AttributeTitle>Choose quantity</AttributeTitle>
-
+          <AttributeArea>
+            <QuantityButton onClick={() => decreaseQuantity(quantity)}>
+              <FaMinus />
+            </QuantityButton>
+            {quantity}
+            <QuantityButton onClick={() => increaseQuantity(quantity)}>
+              <FaPlus />
+            </QuantityButton>
+          </AttributeArea>
           <Button large onClick={addProductToCart}>
             Add to cart
           </Button>
@@ -315,7 +349,6 @@ const AttributeArea = styled.div`
   display: flex;
   align-items: center;
   font-weight: bold;
-  color: ${brand};
   text-align: center;
 `;
 

@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { ConnectedRouter } from 'connected-react-router';
 import { History } from 'history';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import routes from 'routes';
 import { connect } from 'react-redux';
@@ -17,6 +19,10 @@ const App: React.FunctionComponent<MainProps> = ({ history, loading }) => (
     <MainContainer>
       {routes}
       {loading && <Loader />}
+      <ToastContainer
+        autoClose={5000}
+        position={toast.POSITION.BOTTOM_CENTER}
+      />
     </MainContainer>
   </ConnectedRouter>
 );

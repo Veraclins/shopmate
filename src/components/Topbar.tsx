@@ -20,7 +20,7 @@ interface TopBarProps {
   items: CartItem[];
   theme?: any;
   customer: Customer;
-  authenticated?: boolean;
+  authenticated: boolean;
   cartId: string;
   bag: number;
 }

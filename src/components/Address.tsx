@@ -20,8 +20,11 @@ import { useAxios, useForm } from 'helpers/hooks';
 import api from 'services/api';
 import { Customer } from 'state/interfaces';
 import { changeStatus } from 'state/status';
-import { update } from 'state/user';
+import { update, logout } from 'state/user';
 import { rem } from 'styles';
+import { isValidSession, INVALID_SESSION } from 'helpers/auth';
+import { toast } from 'react-toastify';
+import { history } from 'store';
 
 interface AddressProps {
   close: () => void;
@@ -49,7 +52,12 @@ const Address: React.FunctionComponent<AddressProps> = ({
     if (shipping_region_id) {
       data = { ...data, shipping_region_id: shipping_region_id.id };
     }
-
+    const hasSession = isValidSession();
+    if (!hasSession) {
+      dispatch(logout());
+      toast.error(INVALID_SESSION);
+      return history.push('/');
+    }
     try {
       dispatch(changeStatus(true));
       const response = await api.put('customers/address', data);
