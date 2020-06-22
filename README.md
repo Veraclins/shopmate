@@ -1,6 +1,6 @@
 # shopmate
 
-My implementation of the Turing frontend challenge
+A minimal e-commerce site
 
 ## Architecture
 
